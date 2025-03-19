@@ -4,6 +4,7 @@ from Bio.Align import AlignInfo
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import json
+import os
 
 def parse_fasta(fasta_file):
     with open(fasta_file, "r") as file:
@@ -39,6 +40,21 @@ def main(fasta_file, alignment_file, output_file):
 
     print(normalized_df)
     bias_matrix = normalized_df.values.tolist()
+    with open(f'{output_file}.jsonl', 'w') as outfile:
+        for record in SeqIO.parse(fasta_file, "fasta"):
+            name = os.path.basename(fasta_file)
+            sequence = str(record.seq)
+            chain = "A"  # Assuming single chain 'A', modify as needed
+            bias_matrix = bias_matrix
+            entry = {
+                name: {
+                    chain: bias_matrix
+                }
+            }
+            json.dump(entry, outfile)
+            outfile.write('\n')
+
+    normalized_df.to_excel(f'{output_file}.xlsx', index_label="Position")
 
 if __name__ == "__main__":
     fasta_file = "path/to/reference/fasta.fa"
